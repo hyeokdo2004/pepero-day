@@ -53,6 +53,104 @@
     pointer-events: none;
   }
 
+  /* ---------- 인트로: 코를 문질러봐 ---------- */
+  body.locked .card { display: none; }
+  #intro {
+    position: fixed; inset: 0; z-index: 50;
+    background: #1c1820;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    touch-action: none;
+    transition: opacity 1s ease;
+  }
+  #intro.bye { opacity: 0; pointer-events: none; }
+  #intro .blurbg {
+    position: absolute; inset: -40px;
+    background: url(photo.jpg) center/cover;
+    filter: blur(28px) brightness(.7);
+  }
+  .frame {
+    position: relative;
+    width: min(100vw, calc(100dvh * 880 / 1920));
+    aspect-ratio: 880 / 1920;
+    overflow: hidden;
+  }
+  .frame .photo {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    -webkit-user-drag: none; pointer-events: none;
+    transition: filter 1.8s ease, transform 1.8s ease;
+  }
+  .frame.wobble .photo { animation: wobble .35s ease; }
+  @keyframes wobble {
+    0%,100% { transform: scale(1) rotate(0); }
+    30% { transform: scale(1.03) rotate(-1.2deg); }
+    70% { transform: scale(1.03) rotate(1.2deg); }
+  }
+  /* 코 위치 (사진 기준 %) */
+  .nose {
+    position: absolute; left: 52%; top: 67.5%;
+    width: 30%; aspect-ratio: 1; transform: translate(-50%,-50%);
+    border-radius: 50%;
+    transition: opacity .5s;
+  }
+  .nose::before, .nose::after {
+    content: ""; position: absolute; inset: 8%;
+    border: 3px solid #fff; border-radius: 50%;
+    box-shadow: 0 0 14px var(--pink), inset 0 0 14px var(--pink);
+    animation: ring 1.6s ease-out infinite;
+  }
+  .nose::after { animation-delay: .8s; }
+  @keyframes ring { from { transform: scale(.55); opacity: 1; } to { transform: scale(1.25); opacity: 0; } }
+  .finger {
+    position: absolute; left: 50%; top: 58%;
+    font-size: clamp(30px, 9vw, 44px); margin-left: -.5em;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,.4));
+    animation: rub 1.1s ease-in-out infinite;
+  }
+  @keyframes rub { 0%,100% { transform: translateX(-70%) rotate(-12deg); } 50% { transform: translateX(70%) rotate(12deg); } }
+  .rubbing .finger { opacity: 0; }
+
+  .toast {
+    position: absolute; left: 50%; top: max(22px, env(safe-area-inset-top));
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,.95);
+    border: 3px solid var(--ink); border-radius: 22px;
+    padding: 10px 18px 10px 12px;
+    box-shadow: 0 6px 0 var(--ink);
+    white-space: nowrap; z-index: 3;
+    animation: toastIn .8s .5s cubic-bezier(.2,1.5,.4,1) both;
+    transition: opacity .5s;
+  }
+  @keyframes toastIn { from { transform: translate(-50%, -160%); } to { transform: translate(-50%, 0); } }
+  .toast img { width: 44px; height: 36px; object-fit: contain; animation: beat 1.2s ease-in-out infinite; }
+  .toast .t1 { font-size: 12px; color: #8d84a0; text-align: left; }
+  .toast .t2 { font-size: 20px; text-align: left; }
+  .gauge { display: flex; gap: 3px; font-size: 16px; margin-left: 2px; }
+  .gauge span { filter: grayscale(1); opacity: .35; transition: all .3s; }
+  .gauge span.on { filter: none; opacity: 1; transform: scale(1.3); }
+
+  /* 변신 */
+  .morph {
+    position: absolute; left: 50%; top: 62%;
+    width: 118%; transform: translate(-50%,-50%) scale(.75);
+    opacity: 0; pointer-events: none;
+    transition: opacity 1.8s ease, transform 1.8s cubic-bezier(.3,1.2,.5,1);
+  }
+  .morph::before {
+    content: ""; position: absolute; inset: -30%;
+    background: radial-gradient(circle, #fff 0 38%, rgba(255,240,250,.85) 52%, transparent 70%);
+    z-index: -1;
+  }
+  .morph img { width: 100%; display: block; }
+  .changing .photo { filter: blur(14px) brightness(1.25) saturate(.6); transform: scale(1.08); }
+  .changing .morph { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  .changing .nose, .changing ~ .toast, #intro.done .toast { opacity: 0; }
+  .spark {
+    position: absolute; pointer-events: none; z-index: 4;
+    animation: burst .8s cubic-bezier(.2,.8,.3,1) forwards;
+  }
+
   /* ---------- 떨어지는 빼빼로 / 하트 ---------- */
   #sky { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
   .stick {
@@ -249,7 +347,24 @@
   }
 </style>
 </head>
-<body>
+<body class="locked">
+  <div id="intro">
+    <div class="blurbg"></div>
+    <div class="frame" id="frame">
+      <img class="photo" src="photo.jpg" alt="" draggable="false">
+      <div class="nose" id="nose"><span class="finger">👆</span></div>
+      <div class="morph"><img src="kuromi.png" alt=""></div>
+    </div>
+    <div class="toast">
+      <img src="kuromi.png" alt="">
+      <div>
+        <div class="t1">쿠로미의 알림 · 지금</div>
+        <div class="t2">코를 문질러봐! 👃</div>
+      </div>
+      <div class="gauge" id="gauge"><span>💜</span><span>💜</span><span>💜</span></div>
+    </div>
+  </div>
+
   <div id="sky"></div>
 
   <main class="card">
@@ -323,9 +438,71 @@
     h.addEventListener('animationend', () => h.remove());
     sky.appendChild(h);
   }
-  for (let i = 0; i < 6; i++) setTimeout(dropStick, i * 350);
-  setInterval(dropStick, 750);
-  setInterval(floatHeart, 900);
+  function startSky() {
+    for (let i = 0; i < 6; i++) setTimeout(dropStick, i * 350);
+    setInterval(dropStick, 750);
+    setInterval(floatHeart, 900);
+  }
+
+  // ----- 인트로: 코를 세 번 문지르면 쿠로미로 변신 -----
+  const intro = document.getElementById('intro');
+  const frame = document.getElementById('frame');
+  const nose = document.getElementById('nose');
+  const gauge = [...document.querySelectorAll('#gauge span')];
+  const NEED = 3;
+  let rubs = 0, dist = 0, last = null, idleTimer = null, finished = false;
+
+  function sparkle(x, y) {
+    for (let i = 0; i < 6; i++) {
+      const s = document.createElement('span');
+      s.className = 'spark';
+      s.textContent = pick(['✨', '💜', '💗', '⭐']);
+      s.style.fontSize = rand(16, 30) + 'px';
+      s.style.left = x + 'px'; s.style.top = y + 'px';
+      const a = rand(0, Math.PI * 2), d = rand(50, 120);
+      s.style.setProperty('--bx', Math.cos(a) * d + 'px');
+      s.style.setProperty('--by', Math.sin(a) * d + 'px');
+      s.style.setProperty('--rot', rand(-90, 90) + 'deg');
+      s.addEventListener('animationend', () => s.remove());
+      intro.appendChild(s);
+    }
+  }
+  function oneRub(x, y) {
+    gauge[rubs].classList.add('on');
+    rubs++;
+    sparkle(x, y);
+    frame.classList.remove('wobble'); void frame.offsetWidth; frame.classList.add('wobble');
+    if (navigator.vibrate) navigator.vibrate(30);
+    if (rubs >= NEED) transform();
+  }
+  function transform() {
+    finished = true;
+    frame.classList.add('changing');
+    intro.classList.add('done');
+    setTimeout(() => {
+      document.body.classList.remove('locked');
+      startSky();
+      intro.classList.add('bye');
+      setTimeout(() => intro.remove(), 1100);
+    }, 2600);
+  }
+  intro.addEventListener('pointermove', e => {
+    if (finished) return;
+    const r = nose.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const inside = Math.hypot(e.clientX - cx, e.clientY - cy) < r.width * .6;
+    if (!inside) { last = null; return; }
+    if (last) {
+      dist += Math.hypot(e.clientX - last.x, e.clientY - last.y);
+      frame.classList.add('rubbing');
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => frame.classList.remove('rubbing'), 1200);
+      if (dist > r.width * 1.3) { dist = 0; oneRub(e.clientX, e.clientY); }
+    }
+    last = { x: e.clientX, y: e.clientY };
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => intro.addEventListener(t, () => last = null));
+  intro.addEventListener('contextmenu', e => e.preventDefault());
 
   // 터치하면 하트 팡!
   function burst(x, y, n = 8, withSticks = false) {
@@ -346,7 +523,7 @@
     }
   }
   document.addEventListener('pointerdown', e => {
-    if (e.target.closest('#btn')) return;
+    if (e.target.closest('#btn') || e.target.closest('#intro')) return;
     burst(e.clientX, e.clientY);
   });
 
