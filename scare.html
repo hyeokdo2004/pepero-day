@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>우정이에게 온 비밀 편지 💌</title>
+<meta name="description" content="숨은 하트 3개를 찾으면 편지가 열려요">
+<meta property="og:title" content="우정이에게 온 비밀 편지 💌">
+<meta property="og:description" content="숨은 하트 3개를 찾으면 편지가 열려요">
+<meta property="og:image" content="kuromi.png">
+<meta name="theme-color" content="#e9dcff">
+<link rel="icon" href="kuromi.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#2e2a33; --purple:#a78bfa; --purple-deep:#7c5cd6; --pink:#ff8fc0; --pink-soft:#ffd6e8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; color: var(--ink);
+    background: linear-gradient(160deg, #f4ecff 0%, #ffeaf4 100%);
+    user-select: none; -webkit-user-select: none; touch-action: manipulation;
+  }
+
+  /* ---------- 1. 미끼: 숨은 하트 찾기 ---------- */
+  #bait { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; padding: 22px 16px; }
+  .head {
+    background: rgba(255,255,255,.9); border: 3px solid var(--ink); border-radius: 24px;
+    box-shadow: 0 6px 0 var(--ink); padding: 12px 20px; text-align: center; z-index: 2;
+    width: min(400px, 100%);
+  }
+  .head h1 { font-weight: 400; font-size: 22px; }
+  .head p { font-family: 'Gaegu', sans-serif; font-weight: 700; font-size: 18px; color: var(--purple-deep); margin-top: 2px; min-height: 1.3em; }
+  .count { display: inline-flex; gap: 6px; font-size: 20px; margin-top: 4px; }
+  .count span { filter: grayscale(1); opacity: .3; transition: all .3s; }
+  .count span.on { filter: none; opacity: 1; transform: scale(1.25); }
+  #field { position: relative; flex: 1; width: 100%; max-width: 560px; margin-top: 10px; }
+  .deco, .heart { position: absolute; transform: translate(-50%,-50%); }
+  .deco { opacity: .55; animation: twinkle 3s ease-in-out infinite; pointer-events: none; }
+  @keyframes twinkle { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-50%,-50%) scale(1.25) rotate(12deg); } }
+  .heart {
+    font-size: 20px; padding: 12px; cursor: pointer; opacity: .8;
+    transition: transform .3s, opacity .3s;
+  }
+  .heart.tiny { font-size: 9px; opacity: .45; padding: 18px; }
+  .heart.found { transform: translate(-50%,-50%) scale(2.2); opacity: 0; pointer-events: none; }
+
+  /* ---------- 2. 깜짝 ---------- */
+  #scare { position: fixed; inset: 0; background: #000; display: none; overflow: hidden; z-index: 10; }
+  #scare.go { display: block; }
+  .face { position: absolute; inset: 0; transform-origin: 52% 66%; }
+  #scare.go .face { animation: lunge 2.7s cubic-bezier(.1,.9,.2,1) forwards; }
+  .shake { position: absolute; inset: 0; }
+  #scare.go .shake { animation: shake .09s steps(2) infinite; }
+  .face canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 52% 66%; }
+  #base { filter: grayscale(1) contrast(2.3) brightness(.72); }
+  .vig {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 52% 62%, rgba(120,0,0,.0) 0 22%, rgba(90,0,0,.55) 55%, #000 92%);
+    mix-blend-mode: multiply;
+  }
+  .scan {
+    position: absolute; inset: 0; pointer-events: none; opacity: .35;
+    background: repeating-linear-gradient(transparent 0 3px, rgba(0,0,0,.6) 3px 4px);
+  }
+  @keyframes lunge {
+    0%   { transform: scale(.55); }
+    6%   { transform: scale(1.5); }
+    100% { transform: scale(2.3); }
+  }
+  @keyframes shake {
+    0%   { transform: translate(-9px, 6px) rotate(-1.2deg); }
+    50%  { transform: translate(10px, -7px) rotate(1.4deg); }
+    100% { transform: translate(-6px, -8px) rotate(-.6deg); }
+  }
+  #black { position: fixed; inset: 0; background: #000; z-index: 20; opacity: 0; pointer-events: none; transition: opacity .5s; }
+  #black.on { opacity: 1; }
+
+  /* ---------- 3. 화해 ---------- */
+  #sorry {
+    position: fixed; inset: 0; z-index: 30; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+    background: linear-gradient(160deg, #f4ecff 0%, #ffeaf4 100%);
+  }
+  #sorry.on { display: flex; animation: fadein 1.2s ease both; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+  .card {
+    width: min(400px, 100%); background: rgba(255,255,255,.92);
+    border: 3px solid var(--ink); border-radius: 34px; box-shadow: 0 10px 0 var(--ink);
+    padding: 26px 22px; text-align: center;
+  }
+  .card img { width: 62%; animation: bob 2.2s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
+  .card h2 { font-weight: 400; font-size: 34px; margin-top: 6px; }
+  .card p { font-family: 'Gaegu', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.5; margin-top: 8px; }
+  .card p b { color: var(--purple-deep); background: linear-gradient(transparent 62%, var(--pink-soft) 62%); font-weight: 700; }
+  .card a {
+    display: inline-block; margin-top: 18px; font-size: 18px; color: #fff; text-decoration: none;
+    background: var(--purple); border: 3px solid var(--ink); border-radius: 999px;
+    padding: 11px 26px; box-shadow: 0 6px 0 var(--ink);
+  }
+</style>
+</head>
+<body>
+
+  <section id="bait">
+    <div class="head">
+      <h1>💌 우정이에게 온 비밀 편지</h1>
+      <p id="hint">숨은 하트 3개를 찾아서 눌러줘!</p>
+      <div class="count" id="count"><span>💜</span><span>💜</span><span>💜</span></div>
+    </div>
+    <div id="field"></div>
+  </section>
+
+  <section id="scare">
+    <div class="face"><div class="shake">
+      <canvas id="base" width="880" height="1920"></canvas>
+      <canvas id="blood" width="880" height="1920"></canvas>
+      <div class="vig"></div>
+    </div></div>
+    <div class="scan"></div>
+  </section>
+  <div id="black"></div>
+
+  <section id="sorry">
+    <div class="card">
+      <img src="kuromi.png" alt="쿠로미">
+      <h2>놀랐지? 😈</h2>
+      <p>미안미안 ㅋㅋㅋ<br>그래도 <b>우정이</b>가 세상에서 제일 예뻐.<br>많이 사랑해 💜</p>
+      <a href="./">빼빼로데이 편지 보러 가기</a>
+    </div>
+  </section>
+
+<script>
+  const rand = (a, b) => Math.random() * (b - a) + a;
+  const field = document.getElementById('field');
+  const hint = document.getElementById('hint');
+  const gauge = [...document.querySelectorAll('#count span')];
+
+  // ----- 공포 얼굴 미리 그려두기 -----
+  const photo = new Image();
+  photo.src = 'photo.jpg';
+  const base = document.getElementById('base'), blood = document.getElementById('blood');
+  photo.onload = () => {
+    const c = base.getContext('2d');
+    c.drawImage(photo, 0, 0, 880, 1920);
+    const hole = (x, y, rx, ry) => {
+      c.save(); c.translate(x, y); c.scale(1, ry / rx);
+      const g = c.createRadialGradient(0, 0, rx * .25, 0, 0, rx);
+      g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(.7, 'rgba(0,0,0,.96)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = g; c.beginPath(); c.arc(0, 0, rx, 0, 7); c.fill(); c.restore();
+    };
+    hole(287, 1140, 118, 96);   // 왼쪽 눈구멍
+    hole(627, 1126, 118, 96);   // 오른쪽 눈구멍
+    hole(464, 1545, 190, 215);  // 크게 벌어진 입
+
+    const b = blood.getContext('2d');
+    // 눈구멍 속 작은 흰 점
+    b.fillStyle = '#fff'; b.shadowColor = '#fff'; b.shadowBlur = 18;
+    [[300, 1146], [614, 1132]].forEach(([x, y]) => { b.beginPath(); b.arc(x, y, 9, 0, 7); b.fill(); });
+    // 눈에서 흘러내리는 줄기
+    b.shadowColor = 'rgba(60,0,0,.9)'; b.shadowBlur = 10; b.lineCap = 'round';
+    const drip = (x, y, len, w) => {
+      const g = b.createLinearGradient(0, y, 0, y + len);
+      g.addColorStop(0, 'rgba(120,0,0,.95)'); g.addColorStop(1, 'rgba(150,0,0,.55)');
+      b.strokeStyle = g; b.lineWidth = w;
+      b.beginPath(); b.moveTo(x, y); b.bezierCurveTo(x - 8, y + len * .4, x + 10, y + len * .7, x + 2, y + len); b.stroke();
+      b.beginPath(); b.fillStyle = 'rgba(140,0,0,.8)'; b.arc(x + 2, y + len, w * .8, 0, 7); b.fill();
+    };
+    drip(250, 1200, 330, 15); drip(300, 1215, 210, 10); drip(335, 1200, 420, 12);
+    drip(590, 1190, 380, 14); drip(640, 1205, 240, 10); drip(678, 1185, 300, 12);
+  };
+
+  // ----- 비명 소리 (파일 없이 합성) -----
+  let ac = null;
+  function unlockAudio() {
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended') ac.resume();
+    } catch (e) {}
+  }
+  function scream() {
+    if (!ac) return;
+    const t = ac.currentTime, D = 2.7;
+    const out = ac.createGain();
+    out.gain.setValueAtTime(.0001, t);
+    out.gain.exponentialRampToValueAtTime(.85, t + .03);
+    out.gain.setValueAtTime(.85, t + 1.7);
+    out.gain.exponentialRampToValueAtTime(.0001, t + D);
+    const comp = ac.createDynamicsCompressor();
+    out.connect(comp); comp.connect(ac.destination);
+    [0, 7, -9, 13].forEach((d, i) => {
+      const o = ac.createOscillator(); o.type = 'sawtooth'; o.detune.value = d * 10;
+      o.frequency.setValueAtTime(480 + i * 37, t);
+      o.frequency.exponentialRampToValueAtTime(1350 + i * 90, t + .22);
+      o.frequency.linearRampToValueAtTime(880 + i * 60, t + D);
+      const lfo = ac.createOscillator(); lfo.frequency.value = 9 + i * 2;
+      const lg = ac.createGain(); lg.gain.value = 70;
+      lfo.connect(lg); lg.connect(o.frequency);
+      const g = ac.createGain(); g.gain.value = .2;
+      o.connect(g); g.connect(out);
+      o.start(t); lfo.start(t); o.stop(t + D); lfo.stop(t + D);
+    });
+    const buf = ac.createBuffer(1, ac.sampleRate * D, ac.sampleRate);
+    const ch = buf.getChannelData(0);
+    for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+    const n = ac.createBufferSource(); n.buffer = buf;
+    const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2600; bp.Q.value = .7;
+    const ng = ac.createGain(); ng.gain.value = .45;
+    n.connect(bp); bp.connect(ng); ng.connect(out); n.start(t);
+  }
+
+  // ----- 숨은 하트 찾기 -----
+  const DECO = ['✨', '⭐', '🌸', '🍫', '🎀', '🫧', '🍬', '🌙'];
+  for (let i = 0; i < 46; i++) {
+    const d = document.createElement('span');
+    d.className = 'deco'; d.textContent = DECO[i % DECO.length];
+    d.style.left = rand(4, 96) + '%'; d.style.top = rand(4, 96) + '%';
+    d.style.fontSize = rand(14, 26) + 'px'; d.style.animationDelay = rand(0, 3) + 's';
+    field.appendChild(d);
+  }
+  let found = 0;
+  function addHeart(tiny) {
+    const h = document.createElement('span');
+    h.className = 'heart' + (tiny ? ' tiny' : '');
+    h.textContent = '💜';
+    h.style.left = (tiny ? rand(40, 60) : rand(12, 88)) + '%';
+    h.style.top = (tiny ? rand(45, 62) : rand(10, 90)) + '%';
+    h.addEventListener('pointerdown', () => {
+      unlockAudio();
+      h.classList.add('found');
+      gauge[found].classList.add('on');
+      found++;
+      if (found === 1) { hint.textContent = '좋아! 하나 더 👀'; addHeart(false); }
+      else if (found === 2) { hint.textContent = '마지막은 아주 작아… 화면 가까이서 찾아봐 🔍'; setTimeout(() => addHeart(true), 600); }
+      else { hint.textContent = '찾았다! 편지를 여는 중…'; setTimeout(boo, 1300); }
+    }, { once: true });
+    field.appendChild(h);
+  }
+  addHeart(false);
+
+  // ----- 깜짝! -----
+  function boo() {
+    document.getElementById('scare').classList.add('go');
+    document.getElementById('bait').style.display = 'none';
+    scream();
+    if (navigator.vibrate) navigator.vibrate([400, 60, 400, 60, 600]);
+    setTimeout(() => document.getElementById('black').classList.add('on'), 2500);
+    setTimeout(() => {
+      document.getElementById('scare').classList.remove('go');
+      document.getElementById('sorry').classList.add('on');
+      document.getElementById('black').classList.remove('on');
+    }, 3400);
+  }
+</script>
+</body>
+</html>
